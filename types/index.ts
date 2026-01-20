@@ -6,7 +6,7 @@ export interface Transaction {
     source: TransactionSource;
     description: string;
     amount: number; // Negative for expense, Positive for income
-    categoryId: string;
+    categoryId: string | null;
     originalRow: Record<string, any>;
     isExcluded?: boolean; // For deduplication
     autoCategoryReason?: string; // e.g. 'サブスク（自動判定）'

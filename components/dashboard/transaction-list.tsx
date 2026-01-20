@@ -28,7 +28,7 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
 
     const openKeywordsDialog = (t: Transaction) => {
         // Default to current category or first one
-        const catId = t.categoryId === 'other' ? categories[0].id : t.categoryId;
+        const catId = ((t.categoryId === 'other' || !t.categoryId) ? categories[0]?.id : t.categoryId) || "";
         setKeywordDialogState({
             transactionId: t.id,
             categoryId: catId,
@@ -140,16 +140,17 @@ export function TransactionList({ transactions }: { transactions: Transaction[] 
                                     <div className="group relative flex flex-col items-start gap-1">
                                         <select
                                             className="appearance-none bg-transparent text-xs font-medium px-2 py-0.5 rounded cursor-pointer border border-transparent hover:border-border hover:bg-muted/50 transition-colors w-full max-w-[120px]"
-                                            value={t.categoryId}
+                                            value={t.categoryId ?? ""}
                                             onChange={(e) => {
                                                 const newCatId = e.target.value;
                                                 updateTransactionCategory(t.id, newCatId);
                                             }}
                                             style={{
-                                                color: t.categoryId === 'other' ? undefined : 'white',
-                                                backgroundColor: t.categoryId === 'other' ? undefined : getCategoryColor(t.categoryId)
+                                                color: !t.categoryId ? 'gray' : 'white',
+                                                backgroundColor: !t.categoryId ? undefined : getCategoryColor(t.categoryId)
                                             }}
                                         >
+                                            <option value="" className="text-foreground bg-popover">未分類</option>
                                             {categories.map(c => (
                                                 <option key={c.id} value={c.id} className="text-foreground bg-popover">
                                                     {c.name}

@@ -53,7 +53,8 @@ export function AnalyticsCharts({ transactions, mode = 'ALL' }: { transactions: 
         transactions.forEach(t => {
             if (t.isExcluded || t.amount >= 0) return;
             const val = Math.abs(t.amount);
-            map.set(t.categoryId, (map.get(t.categoryId) || 0) + val);
+            const catId = t.categoryId || 'unknown';
+            map.set(catId, (map.get(catId) || 0) + val);
         });
 
         return Array.from(map.entries())

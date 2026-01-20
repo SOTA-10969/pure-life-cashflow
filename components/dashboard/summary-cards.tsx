@@ -24,7 +24,7 @@ export function SummaryCards({
 
         // Apply Category Filter if present
         if (selectedCategoryIds.length > 0) {
-            filtered = filtered.filter(t => selectedCategoryIds.includes(t.categoryId));
+            filtered = filtered.filter(t => t.categoryId && selectedCategoryIds.includes(t.categoryId));
         }
 
         const income = filtered

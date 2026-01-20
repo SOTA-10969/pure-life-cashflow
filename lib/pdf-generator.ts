@@ -86,11 +86,12 @@ export const generatePdfReport = async ({
         const cat = safeCategories.find(c => c.id === t.categoryId);
         const catName = cat ? cat.name : '未分類';
         const catColor = cat ? cat.color : '#94a3b8';
-        const existing = categoryTotals.get(t.categoryId);
+        const catId = t.categoryId || 'unknown';
+        const existing = categoryTotals.get(catId);
         if (existing) {
             existing.amount += Math.abs(t.amount || 0);
         } else {
-            categoryTotals.set(t.categoryId, {
+            categoryTotals.set(catId, {
                 name: catName,
                 amount: Math.abs(t.amount || 0),
                 color: catColor

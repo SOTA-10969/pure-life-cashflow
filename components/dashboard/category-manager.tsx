@@ -18,7 +18,8 @@ export function CategoryManager() {
     const categoryTotals = transactions
         .filter(t => t.date.startsWith(currentMonth) && !t.isExcluded && t.amount < 0)
         .reduce((acc, t) => {
-            acc[t.categoryId] = (acc[t.categoryId] || 0) + Math.abs(t.amount);
+            const catId = t.categoryId || 'unknown';
+            acc[catId] = (acc[catId] || 0) + Math.abs(t.amount);
             return acc;
         }, {} as Record<string, number>);
 

@@ -10,21 +10,23 @@ import { MonthSelector } from "@/components/dashboard/month-selector";
 import { Button } from "@/components/ui/base";
 import { useFinanceStore, FinanceProvider } from "@/hooks/use-finance-store";
 import { useState, useMemo, useEffect } from "react";
-import { Loader2, FileText, Check } from "lucide-react";
+import { Loader2, FileText, Check, LogOut } from "lucide-react";
 import { CategoryFilter } from "@/components/dashboard/category-filter";
 import { generatePdfReport } from "@/lib/pdf-generator";
 
 // Wrapped Component that consumes the context
 function DashboardContent() {
-  const { transactions, clearAllData, categories } = useFinanceStore();
+  const { transactions, clearAllData, categories, isLoaded, user, signOut } = useFinanceStore();
   const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
   const [isPdfGenerating, setIsPdfGenerating] = useState(false);
   const [isCopyingText, setIsCopyingText] = useState(false);
 
-  // Determine available months from data
+  // ALL HOOKS MUST BE BEFORE ANY CONDITIONAL RETURNS
+  // Determine available months from data (with guard)
   const availableMonths = useMemo(() => {
+    if (!transactions || transactions.length === 0) return [];
     const months = new Set<string>();
     transactions.forEach(t => {
       months.add(t.date.substring(0, 7));
@@ -34,15 +36,17 @@ function DashboardContent() {
 
   // Set default month logic
   useEffect(() => {
+    if (!isLoaded) return; // Guard: don't run until loaded
     const current = new Date().toISOString().slice(0, 7);
     if (selectedMonth === 'ALL' && availableMonths.includes(current)) {
       setSelectedMonth(current);
     } else if (selectedMonth === 'ALL' && availableMonths.length > 0) {
       setSelectedMonth(availableMonths[0]);
     }
-  }, [availableMonths.length]);
+  }, [availableMonths, isLoaded]);
 
   const filteredTransactions = useMemo(() => {
+    if (!transactions) return []; // Guard
     let data = transactions;
 
     // 1. Month Filter
@@ -52,11 +56,24 @@ function DashboardContent() {
 
     // 2. Category Filter
     if (selectedCategoryIds.length > 0) {
-      data = data.filter(t => selectedCategoryIds.includes(t.categoryId));
+      data = data.filter(t => t.categoryId && selectedCategoryIds.includes(t.categoryId));
     }
 
     return data;
   }, [transactions, selectedMonth, selectedCategoryIds]);
+
+  // NOW we can have conditional returns (after all hooks)
+  // Show loading state while data is being fetched
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">データを読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleCopyTextForGemini = async () => {
     try {
@@ -168,7 +185,16 @@ ${topCategories}
             </Button>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          {user && (
+            <span className="text-sm text-muted-foreground hidden md:block">
+              {user.email}
+            </span>
+          )}
+          <Button variant="outline" size="sm" onClick={signOut} className="gap-2">
+            <LogOut className="w-4 h-4" />
+            ログアウト
+          </Button>
           <Button variant="destructive" size="sm" onClick={clearAllData}>
             データ全消去
           </Button>

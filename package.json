@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.90.1",
     "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
     "html-to-image": "^1.11.13",
