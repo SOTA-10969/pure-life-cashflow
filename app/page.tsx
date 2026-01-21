@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useRouter } from "next/navigation";
 import { FileUploader } from "@/components/dashboard/file-uploader";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { AnalyticsCharts } from "@/components/dashboard/charts";
@@ -17,6 +18,14 @@ import { generatePdfReport } from "@/lib/pdf-generator";
 // Wrapped Component that consumes the context
 function DashboardContent() {
   const { transactions, clearAllData, categories, isLoaded, user, signOut } = useFinanceStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.push('/login');
+    }
+  }, [isLoaded, user, router]);
+
   const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 

@@ -51,7 +51,11 @@ function useFinanceStoreLogic(): FinanceContextType {
 
     // Auth state listener
     useEffect(() => {
-        if (!supabase) return;
+        if (!supabase) {
+            console.error("Supabase client missing in auth listener");
+            setIsLoaded(true); // Stop loading so UI can show error
+            return;
+        }
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
             setUser(session?.user ?? null);
@@ -60,6 +64,9 @@ function useFinanceStoreLogic(): FinanceContextType {
         // Get initial user
         supabase.auth.getUser().then(({ data: { user } }: any) => {
             setUser(user);
+        }).catch(() => {
+            // If getUser fails, ensure we don't hang
+            setIsLoaded(true);
         });
 
         return () => subscription.unsubscribe();
@@ -70,11 +77,17 @@ function useFinanceStoreLogic(): FinanceContextType {
         if (!user) {
             setTransactions([]);
             setCategories([]);
-            setIsLoaded(false);
+            // If we have a supabase client but no user, it means we are logged out (or Checking).
+            // However, we shouldn't spin forever. Middleware should handle redirect.
+            // But if we are here, we set isLoaded to true to show "something" (e.g. empty) instead of spinner.
+            // Note: If auth is still checking, this might flash. Ideally we track authLoading.
+            // But for now, breaking infinite loop is priority.
+            if (supabase) setIsLoaded(true);
             return;
         }
 
         const loadData = async () => {
+            setIsLoaded(false);
             try {
                 // Check if we need to migrate localStorage data
                 const hasMigrated = localStorage.getItem(STORAGE_KEY_MIGRATED);
