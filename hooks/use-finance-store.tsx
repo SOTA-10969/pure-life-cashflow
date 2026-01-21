@@ -46,6 +46,7 @@ function useFinanceStoreLogic(): FinanceContextType {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const [user, setUser] = useState<User | null>(null);
+    const [authInitialized, setAuthInitialized] = useState(false);
 
     const supabase = createClient();
 
@@ -54,6 +55,7 @@ function useFinanceStoreLogic(): FinanceContextType {
         if (!supabase) {
             console.error("Supabase client missing in auth listener");
             setIsLoaded(true); // Stop loading so UI can show error
+            setAuthInitialized(true);
             return;
         }
 
@@ -67,6 +69,8 @@ function useFinanceStoreLogic(): FinanceContextType {
         }).catch(() => {
             // If getUser fails, ensure we don't hang
             setIsLoaded(true);
+        }).finally(() => {
+            setAuthInitialized(true);
         });
 
         return () => subscription.unsubscribe();
@@ -74,6 +78,8 @@ function useFinanceStoreLogic(): FinanceContextType {
 
     // Load data from Supabase when user is authenticated
     useEffect(() => {
+        if (!authInitialized) return; // Wait until auth check completes
+
         if (!user) {
             setTransactions([]);
             setCategories([]);
@@ -156,7 +162,7 @@ function useFinanceStoreLogic(): FinanceContextType {
         };
 
         loadData();
-    }, [user]);
+    }, [user, authInitialized]);
 
     const migrateLocalStorageData = async () => {
         // ... (migration logic needs similar update but skipping for now to focus on initial sync)
