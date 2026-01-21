@@ -12,6 +12,25 @@ export default function LoginPage() {
 
     const supabase = createClient();
 
+    // Check configuration on load
+    if (!supabase) {
+        // We render this immediately if config is missing
+        return (
+            <div style={{ maxWidth: 400, margin: '100px auto', padding: 24, border: '1px solid #333', borderRadius: 8, textAlign: 'center' }}>
+                <h1 style={{ marginBottom: 24, fontSize: 24 }}>Configuration Error</h1>
+                <div style={{ padding: 12, background: '#fee2e2', color: '#dc2626', borderRadius: 4, textAlign: 'left', fontSize: '14px' }}>
+                    <p style={{ fontWeight: 'bold' }}>Supabase Client not initialized.</p>
+                    <p style={{ marginTop: 8 }}>Please verify that the following Environment Variables are set in your Vercel Project Settings:</p>
+                    <ul style={{ listStyle: 'disc', marginLeft: 20, marginTop: 4 }}>
+                        <li>NEXT_PUBLIC_SUPABASE_URL</li>
+                        <li>NEXT_PUBLIC_SUPABASE_ANON_KEY</li>
+                    </ul>
+                    <p style={{ marginTop: 8 }}>And ensure you have redeployed after setting them.</p>
+                </div>
+            </div>
+        );
+    }
+
     const handleLogin = async () => {
         if (!supabase) {
             setError('Supabase client not initialized');
