@@ -10,6 +10,7 @@ export function createClient() {
 
     // Singleton pattern to avoid creating multiple clients
     if (!supabaseInstance) {
+        // Ensure we use uppercase environment variables to match Vercel standard
         const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
         const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
